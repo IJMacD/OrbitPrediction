@@ -27,18 +27,27 @@ $(function() {
 
       sun = new GE.GameObject(),
       ball = new GE.GameObject(),
-      arrow = new GE.GameObject();
+      e = new GE.GameObject(),
+      m = new GE.GameObject(),
+      arrow = new GE.GameObject(),
 
-  sun.addComponent(function (parent, delta) {
-    renderSystem.push(function (context) {
-      context.translate(parent.position[0], parent.position[1]);
+      ballRenderer = function (parent, delta) {
+        renderSystem.push(function (context) {
+          context.translate(parent.position[0], parent.position[1]);
 
-      context.fillStyle = "#ff0";
-      context.beginPath();
-      context.arc(0, 0, 100, 0, Math.PI * 2, false);
-      context.fill();
-    });
-  });
+          context.fillStyle = parent.color;
+          context.beginPath();
+          context.arc(0, 0, parent.size, 0, Math.PI * 2, false);
+          context.fill();
+        });
+      },
+      pointGravityComponent = new GEC.PointGravityComponent(sun),
+      physicsComponent = new GEC.PhysicsComponent(),
+      moveComponent = new GEC.MoveComponent();
+
+  sun.color = "#ff0";
+  sun.size = 100;
+  sun.addComponent(ballRenderer);
 
   arrow.addComponent(function (parent, delta) {
     // Bad gl-matrix: !!!
@@ -65,9 +74,11 @@ $(function() {
     });
   });
 
+  ball.color = "#08f";
+  ball.size = 20;
   ball.setPosition(0, -200);
   ball.setVelocity(0.06666);
-  ball.bounds = [-20,-20,20,20];
+  // ball.bounds = [-20,-20,20,20];
   // ball.addComponent(new GEC.GravityComponent());
   ball.addComponent(function (parent, delta) {
     if(inputSystem.lastClick[0]){
@@ -75,7 +86,7 @@ $(function() {
       vec3.scaleAndAdd(parent.impulse, parent.impulse, parent.velocity, scale);
     }
   });
-  ball.addComponent(new GEC.PointGravityComponent(sun));
+  ball.addComponent(pointGravityComponent);
 
   ball.addComponent(new GEC.DebugDrawDataComponent(renderSystem));
 
@@ -103,26 +114,40 @@ $(function() {
       context.stroke();
     });
   });
-  ball.addComponent(function (parent, delta) {
-    renderSystem.push(function (context) {
-      context.translate(parent.position[0], parent.position[1]);
 
-      context.fillStyle = "#08f";
-      context.beginPath();
-      context.arc(0, 0, 20, 0, Math.PI * 2, false);
-      context.fill();
-    });
-  });
-
-  ball.addComponent(new GEC.PhysicsComponent());
-  ball.addComponent(new GEC.MoveComponent());
+  ball.addComponent(physicsComponent);
+  ball.addComponent(moveComponent);
   // ball.addComponent(new GEC.WorldBounceComponent(worldSystem));
   ball.addComponent(new GEC.DebugDrawPathComponent(renderSystem));
+
+  ball.addComponent(ballRenderer);
+
+  e.color = "#0f8";
+  e.size = 20;
+  e.setPosition(0, -200);
+  e.setVelocity(0.06666666, 0);
+  e.addComponent(pointGravityComponent);
+  e.addComponent(physicsComponent);
+  e.addComponent(moveComponent);
+  e.addComponent(new GEC.DebugDrawPathComponent(renderSystem));
+  e.addComponent(ballRenderer);
+
+  m.color = "#833";
+  m.size = 15;
+  m.setPosition(0, -400);
+  m.setVelocity(0.05, 0);
+  m.addComponent(pointGravityComponent);
+  m.addComponent(physicsComponent);
+  m.addComponent(moveComponent);
+  m.addComponent(new GEC.DebugDrawPathComponent(renderSystem));
+  m.addComponent(ballRenderer);
 
   cameraSystem.setPosition(0, 0);
   cameraSystem.setScale(0.5);
 
   game.root.addObject(sun);
+  game.root.addObject(e);
+  game.root.addObject(m);
   game.root.addObject(ball);
   game.root.addObject(arrow);
 
